@@ -1,0 +1,41 @@
+# /etc/nginx/sites-available/lab.local
+# Virtual host configuration for the lab website
+# COPY TO: /etc/nginx/sites-available/lab.local
+# THEN: sudo ln -s /etc/nginx/sites-available/lab.local /etc/nginx/sites-enabled/lab.local
+
+server {
+    listen 80;
+    listen [::]:80;
+
+    server_name lab.local www.lab.local web.lab.local;
+
+    root /var/www/lab.local;
+    index index.html;
+
+    # Access and error logs
+    access_log /var/log/nginx/lab.local.access.log;
+    error_log  /var/log/nginx/lab.local.error.log;
+
+    # Main location — try files, then directories, then 404
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    # Custom 404 error page
+    error_page 404 /404.html;
+    location = /404.html {
+        internal;
+    }
+
+    # Server info page — add custom headers for teaching
+    location = /info.html {
+        add_header X-Served-By "Nginx on Debian";
+        add_header X-Lab "FSCJ Linux Fundamentals";
+        try_files $uri =404;
+    }
+
+    # Deny access to hidden files
+    location ~ /\. {
+        deny all;
+    }
+}

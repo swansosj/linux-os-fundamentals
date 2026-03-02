@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux Lab — FSCJ</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav>
+    <div class="nav-container">
+        <a href="index.html" class="logo">$ <span>linux-lab</span></a>
+        <ul>
+            <li><a href="index.html" class="active">Home</a></li>
+            <li><a href="about.html">How the Web Works</a></li>
+            <li><a href="network.html">DNS &amp; Networking</a></li>
+            <li><a href="services.html">systemd Services</a></li>
+            <li><a href="info.html">Server Info</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="hero">
+    <h1>Welcome to the <span class="highlight">Linux Lab</span></h1>
+    <p>This website is running on <strong>Nginx</strong> on a <strong>Debian</strong> server.
+       You resolved this hostname using our <strong>BIND9 DNS server</strong>.
+       Everything here was built and configured in class.</p>
+</div>
+
+<main>
+
+    <div class="card-grid">
+        <div class="card">
+            <div class="icon">🌐</div>
+            <h3>How the Web Works</h3>
+            <p>Learn what happens behind the scenes when you type a URL into your browser — DNS resolution, TCP connections, HTTP requests, and server responses.</p>
+            <a href="about.html">Explore &rarr;</a>
+        </div>
+
+        <div class="card">
+            <div class="icon">📡</div>
+            <h3>DNS &amp; Networking</h3>
+            <p>Understand how domain names translate to IP addresses. See the BIND9 DNS records that make <code>www.lab.local</code> resolve to this server.</p>
+            <a href="network.html">Explore &rarr;</a>
+        </div>
+
+        <div class="card">
+            <div class="icon">⚙️</div>
+            <h3>systemd Services</h3>
+            <p>See how <code>systemctl</code> manages the Nginx web server and BIND9 DNS server that power this page. Start, stop, enable, disable.</p>
+            <a href="services.html">Explore &rarr;</a>
+        </div>
+
+        <div class="card">
+            <div class="icon">🖥️</div>
+            <h3>Server Info</h3>
+            <p>Technical details about this server — check HTTP response headers, view server software versions, and inspect the request your browser made.</p>
+            <a href="info.html">Explore &rarr;</a>
+        </div>
+    </div>
+
+    <div class="content-section">
+        <h2>What Makes This Page Possible?</h2>
+        <p>This simple web page required several Linux services working together. Here's the chain of events that brought this page to your screen:</p>
+
+        <div class="diagram"><span class="label">Your Browser</span>
+    │
+    │  1. "I need to find www.lab.local"
+    │
+    ▼
+<span class="label">BIND9 DNS Server</span> (port 53)
+    │
+    │  2. "www.lab.local = 192.168.1.100"
+    │
+    ▼
+<span class="label">Your Browser</span>
+    │
+    │  3. TCP connection to 192.168.1.100:80
+    │  4. HTTP GET / HTTP/1.1
+    │
+    ▼
+<span class="label">Nginx Web Server</span> (port 80)
+    │
+    │  5. Reads /var/www/lab.local/index.html
+    │  6. HTTP 200 OK + HTML content
+    │
+    ▼
+<span class="label">Your Browser</span>
+    │
+    │  7. Parses HTML, requests css/style.css
+    │  8. Renders the page you're seeing now
+    │
+    ▼
+<span class="label">This Page</span> ✓</div>
+
+        <p>Both <strong>BIND9</strong> and <strong>Nginx</strong> are managed by <strong>systemd</strong> — the init system (PID 1) we identified in lesson 6.1.1. Use <code>systemctl status bind9</code> and <code>systemctl status nginx</code> to see them running.</p>
+    </div>
+
+    <div class="content-section">
+        <h2>Quick Lab Commands</h2>
+        <pre><code><span class="comment"># Check if this web server is running</span>
+<span class="prompt">$</span> <span class="command">sudo systemctl status nginx</span>
+
+<span class="comment"># Check if DNS is running</span>
+<span class="prompt">$</span> <span class="command">sudo systemctl status bind9</span>
+
+<span class="comment"># Test DNS resolution</span>
+<span class="prompt">$</span> <span class="command">dig @localhost www.lab.local +short</span>
+<span class="output">192.168.1.100</span>
+
+<span class="comment"># View live access logs</span>
+<span class="prompt">$</span> <span class="command">sudo tail -f /var/log/nginx/lab.local.access.log</span>
+
+<span class="comment"># View live error logs</span>
+<span class="prompt">$</span> <span class="command">sudo journalctl -u nginx -f</span></code></pre>
+    </div>
+
+</main>
+
+<footer>
+    <p>FSCJ — Linux OS Fundamentals — Lesson 6.2.1</p>
+    <div class="footer-info">Served by Nginx on Debian | DNS by BIND9 | Managed by systemd</div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,36 @@
+; /etc/bind/zones/db.lab.local
+; Forward zone file for lab.local
+; COPY TO: /etc/bind/zones/db.lab.local
+;
+; !! REPLACE 192.168.1.100 with your actual server IP !!
+;
+$TTL    604800
+@       IN      SOA     ns1.lab.local. admin.lab.local. (
+                        2026030201      ; Serial (YYYYMMDD## — increment on each change!)
+                        3600            ; Refresh (1 hour)
+                        1800            ; Retry (30 minutes)
+                        604800          ; Expire (1 week)
+                        86400 )         ; Negative Cache TTL (1 day)
+
+; Name servers
+@       IN      NS      ns1.lab.local.
+
+; A records — name to IP mapping
+ns1     IN      A       192.168.1.100
+www     IN      A       192.168.1.100
+web     IN      A       192.168.1.100
+mail    IN      A       192.168.1.100
+ftp     IN      A       192.168.1.100
+db      IN      A       192.168.1.100
+app     IN      A       192.168.1.100
+
+; CNAME records — aliases
+webserver   IN  CNAME   www.lab.local.
+website     IN  CNAME   www.lab.local.
+dns         IN  CNAME   ns1.lab.local.
+
+; MX record — mail server
+@       IN      MX  10  mail.lab.local.
+
+; TXT record — example SPF record
+@       IN      TXT     "v=spf1 mx -all"

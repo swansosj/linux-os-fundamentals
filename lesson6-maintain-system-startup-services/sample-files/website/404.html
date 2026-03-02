@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 — Page Not Found — Linux Lab</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav>
+    <div class="nav-container">
+        <a href="index.html" class="logo">$ <span>linux-lab</span></a>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">How the Web Works</a></li>
+            <li><a href="network.html">DNS &amp; Networking</a></li>
+            <li><a href="services.html">systemd Services</a></li>
+            <li><a href="info.html">Server Info</a></li>
+        </ul>
+    </div>
+</nav>
+
+<main style="text-align: center; padding: 4rem 2rem;">
+
+    <h1 style="font-size: 6rem; color: var(--accent); margin-bottom: 0;">404</h1>
+    <h2 style="color: var(--text-muted); margin-bottom: 2rem;">Page Not Found</h2>
+
+    <div class="content-section" style="max-width: 700px; margin: 0 auto; text-align: left;">
+        <h2>What happened?</h2>
+        <p>The server received your HTTP request, but the file you asked for doesn't exist in the document root at <code>/var/www/lab.local/</code>.</p>
+
+        <p>This is an <strong>HTTP 404</strong> response — the server is working fine, it just can't find that specific file.</p>
+
+        <h3>Things to check:</h3>
+        <ul>
+            <li>Is the URL spelled correctly?</li>
+            <li>Does the file exist? Check: <code>ls -la /var/www/lab.local/</code></li>
+            <li>Are the file permissions correct? The <code>www-data</code> user needs read access.</li>
+            <li>Check the error log: <code>sudo tail /var/log/nginx/lab.local.error.log</code></li>
+        </ul>
+
+        <h3>See it in the logs:</h3>
+        <pre><code><span class="prompt">$</span> <span class="command">sudo tail -1 /var/log/nginx/lab.local.error.log</span>
+<span class="output">open() "/var/www/lab.local/your-page" failed (2: No such file or directory)</span>
+
+<span class="prompt">$</span> <span class="command">sudo tail -1 /var/log/nginx/lab.local.access.log</span>
+<span class="output">192.168.1.50 - - [01/Mar/2026:15:05:00] "GET /your-page HTTP/1.1" 404 ...</span></code></pre>
+    </div>
+
+    <p style="margin-top: 2rem;">
+        <a href="index.html" style="color: var(--green); font-size: 1.1rem; text-decoration: none;">← Back to Home</a>
+    </p>
+
+</main>
+
+<footer>
+    <p>FSCJ — Linux OS Fundamentals — Lesson 6.2.1</p>
+    <div class="footer-info">Served by Nginx on Debian | DNS by BIND9 | Managed by systemd</div>
+</footer>
+
+</body>
+</html>

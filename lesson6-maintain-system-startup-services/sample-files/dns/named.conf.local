@@ -1,0 +1,21 @@
+// /etc/bind/named.conf.local
+// Zone declarations for lab.local
+// COPY TO: /etc/bind/named.conf.local
+
+// Forward zone — lab.local
+zone "lab.local" {
+    type master;
+    file "/etc/bind/zones/db.lab.local";
+    allow-transfer { none; };
+};
+
+// Reverse zone — 192.168.1.x
+// ADJUST the "1.168.192" to match your subnet:
+//   10.0.0.x    → "0.0.10.in-addr.arpa"
+//   172.16.5.x  → "5.16.172.in-addr.arpa"
+//   192.168.1.x → "1.168.192.in-addr.arpa"
+zone "1.168.192.in-addr.arpa" {
+    type master;
+    file "/etc/bind/zones/db.192.168.1";
+    allow-transfer { none; };
+};

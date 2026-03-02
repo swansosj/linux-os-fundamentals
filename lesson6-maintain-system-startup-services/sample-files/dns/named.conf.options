@@ -1,0 +1,30 @@
+// /etc/bind/named.conf.options
+// BIND9 Options — Lab DNS Server
+// COPY TO: /etc/bind/named.conf.options
+
+options {
+    directory "/var/cache/bind";
+
+    // Allow queries from any network (adjust for your lab subnet)
+    allow-query { any; };
+
+    // Allow recursive queries (needed for full DNS resolution)
+    recursion yes;
+    allow-recursion { any; };
+
+    // Forward unresolved queries to public DNS
+    forwarders {
+        8.8.8.8;        // Google DNS
+        1.1.1.1;        // Cloudflare DNS
+    };
+
+    // Security: hide version info
+    version "not available";
+
+    // Listen on all interfaces
+    listen-on { any; };
+    listen-on-v6 { any; };
+
+    // DNSSEC validation (auto uses built-in trust anchors)
+    dnssec-validation auto;
+};

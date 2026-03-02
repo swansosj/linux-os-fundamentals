@@ -1,0 +1,26 @@
+Name,ID,Department,Salary,Email,Start_Date
+Alice Johnson,1001,Engineering,95000,ajohnson@company.com,2019-03-15
+Bob Smith,1002,Marketing,72000,bsmith@company.com,2020-07-01
+Carol Davis,1003,Engineering,102000,cdavis@company.com,2018-01-20
+David Lee,1004,Sales,68000,dlee@company.com,2021-05-10
+Eve Martinez,1005,Engineering,110000,emartinez@company.com,2017-09-01
+Frank Wilson,1006,HR,65000,fwilson@company.com,2022-02-14
+Grace Kim,1007,Marketing,78000,gkim@company.com,2019-11-30
+Henry Brown,1008,Sales,71000,hbrown@company.com,2020-08-22
+Irene Taylor,1009,Engineering,98000,itaylor@company.com,2018-06-05
+Jack Anderson,1010,HR,62000,janderson@company.com,2023-01-09
+Karen Thomas,1011,Sales,74000,kthomas@company.com,2019-04-18
+Leo Garcia,1012,Engineering,105000,lgarcia@company.com,2017-12-01
+Maria Rodriguez,1013,Marketing,82000,mrodriguez@company.com,2018-10-15
+Nathan Clark,1014,Finance,88000,nclark@company.com,2019-08-20
+Olivia White,1015,Finance,91000,owhite@company.com,2018-03-11
+Peter Hall,1016,Engineering,115000,phall@company.com,2016-07-25
+Quinn Adams,1017,HR,67000,qadams@company.com,2021-11-01
+Rachel Scott,1018,Marketing,76000,rscott@company.com,2020-06-14
+Sam Mitchell,1019,Sales,69000,smitchell@company.com,2022-09-30
+Tina Roberts,1020,Finance,93000,troberts@company.com,2017-05-08
+Uma Patel,1021,Engineering,99000,upatel@company.com,2019-01-22
+Victor Nguyen,1022,Sales,73000,vnguyen@company.com,2020-12-03
+Wendy Chen,1023,Marketing,80000,wchen@company.com,2018-08-19
+Xavier Brooks,1024,Finance,86000,xbrooks@company.com,2021-03-07
+Yara Gonzalez,1025,Engineering,108000,ygonzalez@company.com,2017-11-15

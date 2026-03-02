@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>systemd Services — Linux Lab</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav>
+    <div class="nav-container">
+        <a href="index.html" class="logo">$ <span>linux-lab</span></a>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">How the Web Works</a></li>
+            <li><a href="network.html">DNS &amp; Networking</a></li>
+            <li><a href="services.html" class="active">systemd Services</a></li>
+            <li><a href="info.html">Server Info</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="hero">
+    <h1><span class="highlight">systemd</span> Services</h1>
+    <p>How systemctl manages the services powering this website.</p>
+</div>
+
+<main>
+
+    <div class="content-section">
+        <h2>Services Running This Website</h2>
+        <p>Two systemd services work together to deliver this page to you:</p>
+
+        <div class="card-grid">
+            <div class="card">
+                <h3>nginx.service</h3>
+                <span class="badge badge-green">Active</span>
+                <p><strong>Role:</strong> Web server — serves HTML, CSS, and other files over HTTP (port 80)</p>
+                <p><strong>Config:</strong> <code>/etc/nginx/sites-enabled/lab.local</code></p>
+                <p><strong>Docs Root:</strong> <code>/var/www/lab.local/</code></p>
+                <p><strong>Logs:</strong> <code>/var/log/nginx/</code></p>
+                <pre><code><span class="prompt">$</span> <span class="command">sudo systemctl status nginx</span></code></pre>
+            </div>
+            <div class="card">
+                <h3>bind9.service</h3>
+                <span class="badge badge-green">Active</span>
+                <p><strong>Role:</strong> DNS server — resolves <code>www.lab.local</code> to the server's IP address (port 53)</p>
+                <p><strong>Config:</strong> <code>/etc/bind/named.conf.local</code></p>
+                <p><strong>Zones:</strong> <code>/etc/bind/zones/</code></p>
+                <p><strong>Logs:</strong> <code>journalctl -u bind9</code></p>
+                <pre><code><span class="prompt">$</span> <span class="command">sudo systemctl status bind9</span></code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-section">
+        <h2>systemctl Command Reference</h2>
+
+        <h3>Checking Status</h3>
+        <table>
+            <tr><th>Command</th><th>What It Does</th></tr>
+            <tr><td><code>systemctl status nginx</code></td><td>Detailed status with recent logs</td></tr>
+            <tr><td><code>systemctl is-active nginx</code></td><td>Quick check: "active" or "inactive"</td></tr>
+            <tr><td><code>systemctl is-enabled nginx</code></td><td>Does it start on boot? "enabled" or "disabled"</td></tr>
+            <tr><td><code>systemctl is-failed nginx</code></td><td>Has it crashed? "active" or "failed"</td></tr>
+        </table>
+
+        <h3>Controlling Services</h3>
+        <table>
+            <tr><th>Command</th><th>What It Does</th><th>Analogy</th></tr>
+            <tr><td><code>sudo systemctl start nginx</code></td><td>Start the service now</td><td>Turn the light ON</td></tr>
+            <tr><td><code>sudo systemctl stop nginx</code></td><td>Stop the service now</td><td>Turn the light OFF</td></tr>
+            <tr><td><code>sudo systemctl restart nginx</code></td><td>Stop then start</td><td>Flip the switch off and on</td></tr>
+            <tr><td><code>sudo systemctl reload nginx</code></td><td>Re-read config, no downtime</td><td>Adjust the dimmer without flipping</td></tr>
+        </table>
+
+        <h3>Boot Behavior</h3>
+        <table>
+            <tr><th>Command</th><th>What It Does</th><th>Analogy</th></tr>
+            <tr><td><code>sudo systemctl enable nginx</code></td><td>Start on every boot</td><td>Set an alarm clock</td></tr>
+            <tr><td><code>sudo systemctl disable nginx</code></td><td>Don't start on boot</td><td>Turn off the alarm</td></tr>
+            <tr><td><code>sudo systemctl enable --now nginx</code></td><td>Enable AND start right now</td><td>Set alarm AND wake up now</td></tr>
+            <tr><td><code>sudo systemctl mask nginx</code></td><td>Completely prevent starting</td><td>Throw away the alarm clock</td></tr>
+        </table>
+
+        <div class="alert alert-warning">
+            <strong>Remember:</strong> <code>start</code>/<code>stop</code> = right now (this session). <code>enable</code>/<code>disable</code> = on boot (survives reboot). You usually need both!
+        </div>
+    </div>
+
+    <div class="content-section">
+        <h2>Try It: Stop This Website</h2>
+        <p>Here's a live demo you can try (and then fix!):</p>
+
+        <pre><code><span class="comment"># Step 1: Verify nginx is running</span>
+<span class="prompt">$</span> <span class="command">systemctl is-active nginx</span>
+<span class="output">active</span>
+
+<span class="comment"># Step 2: Stop nginx</span>
+<span class="prompt">$</span> <span class="command">sudo systemctl stop nginx</span>
+
+<span class="comment"># Step 3: Try to load the website → FAILS!</span>
+<span class="prompt">$</span> <span class="command">curl http://localhost</span>
+<span class="output">curl: (7) Failed to connect to localhost port 80: Connection refused</span>
+
+<span class="comment"># Step 4: Check status — see it's dead</span>
+<span class="prompt">$</span> <span class="command">systemctl status nginx</span>
+<span class="output">● nginx.service - A high performance web server
+     Active: inactive (dead)</span>
+
+<span class="comment"># Step 5: Start it again</span>
+<span class="prompt">$</span> <span class="command">sudo systemctl start nginx</span>
+
+<span class="comment"># Step 6: Website works again!</span>
+<span class="prompt">$</span> <span class="command">curl -I http://localhost</span>
+<span class="output">HTTP/1.1 200 OK</span></code></pre>
+    </div>
+
+    <div class="content-section">
+        <h2>Viewing Logs with journalctl</h2>
+        <p><code>journalctl</code> reads the systemd journal — the centralized log for all services.</p>
+
+        <pre><code><span class="comment"># Last 20 log lines for nginx</span>
+<span class="prompt">$</span> <span class="command">sudo journalctl -u nginx -n 20</span>
+
+<span class="comment"># Follow nginx logs in real time</span>
+<span class="prompt">$</span> <span class="command">sudo journalctl -u nginx -f</span>
+
+<span class="comment"># Show only errors</span>
+<span class="prompt">$</span> <span class="command">sudo journalctl -u nginx -p err</span>
+
+<span class="comment"># Logs since last boot</span>
+<span class="prompt">$</span> <span class="command">sudo journalctl -u bind9 -b</span>
+
+<span class="comment"># Logs from the last hour</span>
+<span class="prompt">$</span> <span class="command">sudo journalctl -u nginx --since "1 hour ago"</span></code></pre>
+    </div>
+
+    <div class="content-section">
+        <h2>The Symlink Connection</h2>
+        <p>Enabling a service in systemd and enabling an Nginx site both work the same way — <strong>symbolic links</strong>!</p>
+
+        <div class="diagram"><span class="label">systemd "enable":</span>
+  systemctl enable nginx
+  Creates: /etc/systemd/system/multi-user.target.wants/nginx.service
+              <span class="arrow">→</span> /lib/systemd/system/nginx.service
+
+<span class="label">Nginx "enable site":</span>
+  ln -s /etc/nginx/sites-available/lab.local /etc/nginx/sites-enabled/lab.local
+  Creates: /etc/nginx/sites-enabled/lab.local
+              <span class="arrow">→</span> /etc/nginx/sites-available/lab.local
+
+<span class="label">Both use the same concept:</span>
+  Enabled = symlink exists (points to the real config)
+  Disabled = symlink removed (config file stays safe)</div>
+
+        <pre><code><span class="comment"># Verify the symlinks</span>
+<span class="prompt">$</span> <span class="command">ls -la /etc/nginx/sites-enabled/</span>
+<span class="output">lab.local -> /etc/nginx/sites-available/lab.local</span>
+
+<span class="prompt">$</span> <span class="command">ls -la /etc/systemd/system/multi-user.target.wants/ | grep nginx</span>
+<span class="output">nginx.service -> /lib/systemd/system/nginx.service</span></code></pre>
+    </div>
+
+    <div class="content-section">
+        <h2>Listing Services</h2>
+        <pre><code><span class="comment"># All running services</span>
+<span class="prompt">$</span> <span class="command">systemctl list-units --type=service --state=running</span>
+
+<span class="comment"># All enabled services (start on boot)</span>
+<span class="prompt">$</span> <span class="command">systemctl list-unit-files --type=service --state=enabled</span>
+
+<span class="comment"># Failed services</span>
+<span class="prompt">$</span> <span class="command">systemctl list-units --type=service --state=failed</span>
+
+<span class="comment"># View the actual unit file</span>
+<span class="prompt">$</span> <span class="command">systemctl cat nginx.service</span></code></pre>
+    </div>
+
+</main>
+
+<footer>
+    <p>FSCJ — Linux OS Fundamentals — Lesson 6.2.1</p>
+    <div class="footer-info">Served by Nginx on Debian | DNS by BIND9 | Managed by systemd</div>
+</footer>
+
+</body>
+</html>

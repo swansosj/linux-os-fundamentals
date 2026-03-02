@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Info — Linux Lab</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav>
+    <div class="nav-container">
+        <a href="index.html" class="logo">$ <span>linux-lab</span></a>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">How the Web Works</a></li>
+            <li><a href="network.html">DNS &amp; Networking</a></li>
+            <li><a href="services.html">systemd Services</a></li>
+            <li><a href="info.html" class="active">Server Info</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="hero">
+    <h1>Server <span class="highlight">Info</span></h1>
+    <p>Technical details about this server and how to inspect HTTP requests.</p>
+</div>
+
+<main>
+
+    <div class="content-section">
+        <h2>About This Server</h2>
+        <table>
+            <tr><th>Detail</th><th>Value</th></tr>
+            <tr><td>Web Server</td><td>Nginx</td></tr>
+            <tr><td>Operating System</td><td>Debian GNU/Linux</td></tr>
+            <tr><td>DNS Server</td><td>BIND9 (ISC)</td></tr>
+            <tr><td>Init System</td><td>systemd (PID 1)</td></tr>
+            <tr><td>HTTP Port</td><td>80</td></tr>
+            <tr><td>DNS Port</td><td>53 (TCP + UDP)</td></tr>
+            <tr><td>Document Root</td><td><code>/var/www/lab.local/</code></td></tr>
+            <tr><td>Nginx Config</td><td><code>/etc/nginx/sites-enabled/lab.local</code></td></tr>
+            <tr><td>DNS Zone</td><td><code>/etc/bind/zones/db.lab.local</code></td></tr>
+        </table>
+    </div>
+
+    <div class="content-section">
+        <h2>Inspecting HTTP Headers</h2>
+        <p>HTTP headers are metadata sent between the browser and server. Here's how to see them:</p>
+
+        <h3>View Response Headers with curl</h3>
+        <pre><code><span class="comment"># -I shows only headers (HEAD request)</span>
+<span class="prompt">$</span> <span class="command">curl -I http://www.lab.local</span>
+<span class="output">HTTP/1.1 200 OK
+Server: nginx/1.22.1
+Date: Sun, 01 Mar 2026 15:00:00 GMT
+Content-Type: text/html
+Content-Length: 5432
+Last-Modified: Sun, 01 Mar 2026 10:00:00 GMT
+Connection: keep-alive
+ETag: "65e2a1b0-1538"
+Accept-Ranges: bytes</span></code></pre>
+
+        <h3>View Request AND Response Headers</h3>
+        <pre><code><span class="comment"># -v (verbose) shows the full conversation</span>
+<span class="prompt">$</span> <span class="command">curl -v http://www.lab.local 2>&amp;1 | head -25</span>
+<span class="output">*   Trying 192.168.1.100:80...
+* Connected to www.lab.local (192.168.1.100) port 80
+> GET / HTTP/1.1
+> Host: www.lab.local
+> User-Agent: curl/7.88.1
+> Accept: */*
+>
+< HTTP/1.1 200 OK
+< Server: nginx/1.22.1
+< Content-Type: text/html
+< Content-Length: 5432
+...</span></code></pre>
+
+        <p>Lines starting with <code>&gt;</code> = what your client <strong>sent</strong> (request)<br>
+           Lines starting with <code>&lt;</code> = what the server <strong>replied</strong> (response)</p>
+
+        <h3>Custom Headers on This Page</h3>
+        <p>This <code>/info.html</code> page has custom headers added by the Nginx config:</p>
+        <pre><code><span class="prompt">$</span> <span class="command">curl -I http://www.lab.local/info.html</span>
+<span class="output">HTTP/1.1 200 OK
+Server: nginx/1.22.1
+X-Served-By: Nginx on Debian
+X-Lab: FSCJ Linux Fundamentals
+...</span></code></pre>
+        <p>Those <code>X-</code> headers were added in the Nginx config:</p>
+        <pre><code><span class="output">location = /info.html {
+    add_header X-Served-By "Nginx on Debian";
+    add_header X-Lab "FSCJ Linux Fundamentals";
+}</span></code></pre>
+    </div>
+
+    <div class="content-section">
+        <h2>Check What's Listening</h2>
+        <pre><code><span class="comment"># Show all listening TCP ports with process names</span>
+<span class="prompt">$</span> <span class="command">sudo ss -tlnp</span>
+<span class="output">State  Recv-Q  Send-Q  Local Address:Port  Peer Address:Port  Process
+LISTEN 0       511     0.0.0.0:80          0.0.0.0:*          users:(("nginx",pid=1235))
+LISTEN 0       4096    0.0.0.0:53          0.0.0.0:*          users:(("named",pid=890))
+LISTEN 0       128     0.0.0.0:22          0.0.0.0:*          users:(("sshd",pid=650))</span>
+
+<span class="comment"># Show UDP listeners (DNS uses both TCP and UDP)</span>
+<span class="prompt">$</span> <span class="command">sudo ss -ulnp</span>
+<span class="output">State  Recv-Q  Send-Q  Local Address:Port  Peer Address:Port  Process
+UNCONN 0       0       0.0.0.0:53          0.0.0.0:*          users:(("named",pid=890))</span></code></pre>
+    </div>
+
+    <div class="content-section">
+        <h2>Server Process Information</h2>
+        <pre><code><span class="comment"># Show Nginx processes</span>
+<span class="prompt">$</span> <span class="command">ps aux | grep nginx</span>
+<span class="output">root      1234  0.0  0.1  10000  1500 ?  Ss  10:00  0:00 nginx: master process
+www-data  1235  0.0  0.2  10500  2000 ?  S   10:00  0:00 nginx: worker process
+www-data  1236  0.0  0.2  10500  2000 ?  S   10:00  0:00 nginx: worker process</span>
+
+<span class="comment"># Show BIND9 process</span>
+<span class="prompt">$</span> <span class="command">ps aux | grep named</span>
+<span class="output">bind       890  0.0  0.5  25000  5000 ?  Ssl 10:00  0:01 /usr/sbin/named -f -u bind</span>
+
+<span class="comment"># Show PID 1 (init/systemd — manages both of these)</span>
+<span class="prompt">$</span> <span class="command">ps -p 1 -o pid,comm,args</span>
+<span class="output">  PID COMM    ARGS
+    1 systemd /sbin/init</span></code></pre>
+    </div>
+
+    <div class="content-section">
+        <h2>File Layout</h2>
+        <div class="diagram"><span class="label">Nginx Files:</span>
+/etc/nginx/
+├── nginx.conf                      <span class="comment">Main config</span>
+├── sites-available/
+│   └── lab.local                   <span class="comment">Our virtual host config</span>
+├── sites-enabled/
+│   └── lab.local <span class="arrow">→</span> ../sites-available/lab.local  <span class="comment">(symlink!)</span>
+│
+/var/www/lab.local/                 <span class="comment">Document root</span>
+├── index.html
+├── about.html
+├── network.html
+├── services.html
+├── info.html                       <span class="comment">← You are here</span>
+├── 404.html
+└── css/
+    └── style.css
+
+/var/log/nginx/
+├── lab.local.access.log            <span class="comment">Every request logged here</span>
+└── lab.local.error.log             <span class="comment">Errors logged here</span>
+
+<span class="label">BIND9 DNS Files:</span>
+/etc/bind/
+├── named.conf                      <span class="comment">Main config (includes others)</span>
+├── named.conf.options              <span class="comment">Server options, forwarders</span>
+├── named.conf.local                <span class="comment">Zone declarations</span>
+└── zones/
+    ├── db.lab.local                <span class="comment">Forward zone (name → IP)</span>
+    └── db.192.168.1                <span class="comment">Reverse zone (IP → name)</span></div>
+    </div>
+
+    <div class="content-section">
+        <h2>Quick Diagnostics</h2>
+        <pre><code><span class="comment"># Everything you need to troubleshoot in 60 seconds:</span>
+
+<span class="prompt">$</span> <span class="command">systemctl is-active nginx bind9</span>          <span class="comment"># Are they running?</span>
+<span class="prompt">$</span> <span class="command">sudo ss -tlnp | grep -E ':53|:80'</span>        <span class="comment"># Are ports open?</span>
+<span class="prompt">$</span> <span class="command">sudo nginx -t</span>                             <span class="comment"># Is the config valid?</span>
+<span class="prompt">$</span> <span class="command">sudo named-checkconf</span>                      <span class="comment"># Is DNS config valid?</span>
+<span class="prompt">$</span> <span class="command">dig @localhost www.lab.local +short</span>       <span class="comment"># Does DNS resolve?</span>
+<span class="prompt">$</span> <span class="command">curl -I http://localhost</span>                  <span class="comment"># Does HTTP respond?</span>
+<span class="prompt">$</span> <span class="command">sudo journalctl -u nginx -n 5</span>            <span class="comment"># Recent nginx logs?</span>
+<span class="prompt">$</span> <span class="command">sudo journalctl -u bind9 -n 5</span>            <span class="comment"># Recent DNS logs?</span></code></pre>
+    </div>
+
+</main>
+
+<footer>
+    <p>FSCJ — Linux OS Fundamentals — Lesson 6.2.1</p>
+    <div class="footer-info">Served by Nginx on Debian | DNS by BIND9 | Managed by systemd</div>
+</footer>
+
+</body>
+</html>

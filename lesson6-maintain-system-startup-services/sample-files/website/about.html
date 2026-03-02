@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How the Web Works — Linux Lab</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav>
+    <div class="nav-container">
+        <a href="index.html" class="logo">$ <span>linux-lab</span></a>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html" class="active">How the Web Works</a></li>
+            <li><a href="network.html">DNS &amp; Networking</a></li>
+            <li><a href="services.html">systemd Services</a></li>
+            <li><a href="info.html">Server Info</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="hero">
+    <h1>How the <span class="highlight">Web</span> Works</h1>
+    <p>What actually happens behind the scenes when you visit a website?</p>
+</div>
+
+<main>
+
+    <div class="content-section">
+        <h2>Step 1: DNS Resolution</h2>
+        <p>When you type <code>http://www.lab.local</code> into your browser, the first thing that happens is <strong>DNS resolution</strong> — translating the human-readable name into an IP address.</p>
+
+        <div class="diagram"><span class="label">Browser</span>: "What is the IP address of www.lab.local?"
+    │
+    ▼
+<span class="label">OS DNS Resolver</span> (/etc/resolv.conf → nameserver 192.168.1.100)
+    │
+    ▼
+<span class="label">BIND9 DNS Server</span> (192.168.1.100:53)
+    │
+    │  Looks up zone file: /etc/bind/zones/db.lab.local
+    │  Found: www  IN  A  192.168.1.100
+    │
+    ▼
+<span class="label">Browser</span>: "Got it! www.lab.local = 192.168.1.100"</div>
+
+        <p>You can see this yourself:</p>
+        <pre><code><span class="prompt">$</span> <span class="command">dig www.lab.local +short</span>
+<span class="output">192.168.1.100</span>
+
+<span class="prompt">$</span> <span class="command">nslookup www.lab.local</span>
+<span class="output">Server:		192.168.1.100
+Address:	192.168.1.100#53
+Name:	www.lab.local
+Address: 192.168.1.100</span></code></pre>
+
+        <div class="alert alert-info">
+            <strong>Key File:</strong> <code>/etc/resolv.conf</code> — This file tells your computer which DNS server to ask. We pointed it to our lab server.
+        </div>
+    </div>
+
+    <div class="content-section">
+        <h2>Step 2: TCP Connection</h2>
+        <p>Now that the browser has the IP address, it opens a <strong>TCP connection</strong> to port 80 (HTTP) on the server. This is the famous "three-way handshake":</p>
+
+        <div class="diagram"><span class="label">Browser</span> (client)                    <span class="label">Nginx</span> (server)
+    │                                      │
+    │  ──── SYN ────────────────────────>  │   1. "I want to connect"
+    │                                      │
+    │  <──── SYN-ACK ──────────────────── │   2. "OK, I acknowledge"
+    │                                      │
+    │  ──── ACK ────────────────────────>  │   3. "Great, we're connected"
+    │                                      │
+    │  ═══ TCP CONNECTION ESTABLISHED ═══  │</div>
+
+        <p>You can verify the server is listening:</p>
+        <pre><code><span class="prompt">$</span> <span class="command">sudo ss -tlnp | grep :80</span>
+<span class="output">LISTEN  0  511  0.0.0.0:80  0.0.0.0:*  users:(("nginx",pid=1235,fd=6))</span></code></pre>
+    </div>
+
+    <div class="content-section">
+        <h2>Step 3: HTTP Request</h2>
+        <p>Over the TCP connection, the browser sends an <strong>HTTP request</strong>. Here's what it actually looks like:</p>
+
+        <pre><code><span class="command">GET /about.html HTTP/1.1</span>
+<span class="output">Host: www.lab.local
+User-Agent: Mozilla/5.0 (X11; Linux x86_64)
+Accept: text/html,application/xhtml+xml
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate
+Connection: keep-alive</span></code></pre>
+
+        <p>The key parts:</p>
+        <table>
+            <tr><th>Part</th><th>Example</th><th>Meaning</th></tr>
+            <tr><td><strong>Method</strong></td><td><code>GET</code></td><td>I want to retrieve a resource</td></tr>
+            <tr><td><strong>Path</strong></td><td><code>/about.html</code></td><td>Which file I want</td></tr>
+            <tr><td><strong>Host header</strong></td><td><code>www.lab.local</code></td><td>Which website (virtual host)</td></tr>
+            <tr><td><strong>User-Agent</strong></td><td><code>Mozilla/5.0...</code></td><td>What browser I'm using</td></tr>
+        </table>
+
+        <p>Try it yourself with <code>curl</code>:</p>
+        <pre><code><span class="prompt">$</span> <span class="command">curl -v http://www.lab.local/about.html 2>&amp;1 | head -20</span></code></pre>
+    </div>
+
+    <div class="content-section">
+        <h2>Step 4: Server Processing</h2>
+        <p>Nginx receives the request and processes it:</p>
+
+        <ol>
+            <li>Checks <code>server_name</code> to match the right virtual host config</li>
+            <li>Looks at the Nginx config file: <code>/etc/nginx/sites-enabled/lab.local</code></li>
+            <li>Finds <code>root /var/www/lab.local;</code></li>
+            <li>Reads the file: <code>/var/www/lab.local/about.html</code></li>
+            <li>Sends it back as an HTTP response</li>
+        </ol>
+
+        <div class="alert alert-success">
+            <strong>The symlink connection:</strong> Nginx looks in <code>sites-enabled/</code> which contains a <strong>symbolic link</strong> to the real config in <code>sites-available/</code>. This is the <code>ln -s</code> command from lesson 6.1.1!
+        </div>
+    </div>
+
+    <div class="content-section">
+        <h2>Step 5: HTTP Response</h2>
+        <p>The server sends back the HTML content with an HTTP response:</p>
+
+        <pre><code><span class="command">HTTP/1.1 200 OK</span>
+<span class="output">Server: nginx/1.22.1
+Date: Sun, 01 Mar 2026 15:00:00 GMT
+Content-Type: text/html
+Content-Length: 5432
+Connection: keep-alive</span>
+
+<span class="output">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  (... the HTML content of this page ...)
+&lt;/html&gt;</span></code></pre>
+
+        <table>
+            <tr><th>Status Code</th><th>Meaning</th></tr>
+            <tr><td><code>200 OK</code></td><td>Success — here's your page</td></tr>
+            <tr><td><code>301 Moved</code></td><td>Page has permanently moved</td></tr>
+            <tr><td><code>304 Not Modified</code></td><td>You already have the latest version (cached)</td></tr>
+            <tr><td><code>403 Forbidden</code></td><td>You're not allowed to access this</td></tr>
+            <tr><td><code>404 Not Found</code></td><td>This page doesn't exist</td></tr>
+            <tr><td><code>500 Server Error</code></td><td>Something broke on the server</td></tr>
+        </table>
+    </div>
+
+    <div class="content-section">
+        <h2>Step 6: Browser Renders the Page</h2>
+        <p>The browser receives the HTML and:</p>
+        <ol>
+            <li>Parses the HTML structure</li>
+            <li>Finds the <code>&lt;link rel="stylesheet" href="css/style.css"&gt;</code> tag</li>
+            <li>Sends <strong>another HTTP request</strong> for <code>css/style.css</code></li>
+            <li>Applies the CSS styles to the HTML elements</li>
+            <li>Renders the final visual page you see</li>
+        </ol>
+
+        <div class="alert alert-warning">
+            <strong>Every resource = another request!</strong> Each CSS file, image, JavaScript file, and font triggers a separate HTTP request to the server. A typical modern webpage makes 50-100 requests.
+        </div>
+
+        <p>Watch the requests in real time:</p>
+        <pre><code><span class="prompt">$</span> <span class="command">sudo tail -f /var/log/nginx/lab.local.access.log</span>
+<span class="output">192.168.1.50 - - [01/Mar/2026:15:00:00] "GET /about.html HTTP/1.1" 200 5432
+192.168.1.50 - - [01/Mar/2026:15:00:00] "GET /css/style.css HTTP/1.1" 200 4096</span></code></pre>
+    </div>
+
+    <div class="content-section">
+        <h2>The Complete Picture</h2>
+        <div class="diagram">┌──────────────────────────────────────────────────────────────────┐
+│                    WHAT HAPPENS WHEN YOU VISIT A WEBSITE          │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  1. <span class="label">DNS LOOKUP</span>        www.lab.local → 192.168.1.100            │
+│     Config: /etc/bind/zones/db.lab.local                         │
+│     Service: bind9.service (systemctl status bind9)              │
+│                                                                  │
+│  2. <span class="label">TCP CONNECT</span>       Browser → 192.168.1.100:80              │
+│     Check: ss -tlnp | grep :80                                  │
+│                                                                  │
+│  3. <span class="label">HTTP REQUEST</span>      GET /about.html HTTP/1.1                 │
+│     Test: curl -v http://www.lab.local/about.html                │
+│                                                                  │
+│  4. <span class="label">SERVER PROCESS</span>    Nginx reads /var/www/lab.local/about.html│
+│     Config: /etc/nginx/sites-enabled/lab.local (symlink!)        │
+│     Service: nginx.service (systemctl status nginx)              │
+│                                                                  │
+│  5. <span class="label">HTTP RESPONSE</span>     200 OK + HTML content                    │
+│     Log: /var/log/nginx/lab.local.access.log                     │
+│                                                                  │
+│  6. <span class="label">RENDER</span>            Browser displays the page                 │
+│                                                                  │
+└──────────────────────────────────────────────────────────────────┘</div>
+    </div>
+
+</main>
+
+<footer>
+    <p>FSCJ — Linux OS Fundamentals — Lesson 6.2.1</p>
+    <div class="footer-info">Served by Nginx on Debian | DNS by BIND9 | Managed by systemd</div>
+</footer>
+
+</body>
+</html>

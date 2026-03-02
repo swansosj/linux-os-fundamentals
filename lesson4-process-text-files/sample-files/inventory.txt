@@ -1,0 +1,21 @@
+Product_Name	Category	Quantity	Unit_Price	Warehouse
+Laptop Pro 15	Electronics	45	1299.99	East
+Wireless Mouse	Electronics	200	29.99	West
+Office Chair	Furniture	78	349.50	East
+Standing Desk	Furniture	32	599.00	North
+USB-C Hub	Electronics	150	49.99	West
+Monitor 27in	Electronics	60	449.99	East
+Keyboard Mech	Electronics	120	89.99	West
+Filing Cabinet	Furniture	25	189.00	North
+Desk Lamp	Furniture	95	45.99	East
+Webcam HD	Electronics	180	79.99	West
+Printer Laser	Electronics	40	299.99	North
+Paper Ream	Supplies	500	8.99	East
+Pen Box 12pk	Supplies	300	12.50	West
+Stapler Heavy	Supplies	150	15.99	East
+Binder 3in	Supplies	250	7.49	North
+Whiteboard 4x6	Furniture	18	129.99	West
+Marker Set	Supplies	200	9.99	East
+Headset Pro	Electronics	85	149.99	North
+Notebook Pack	Supplies	400	5.99	West
+Ergonomic Mouse	Electronics	110	69.99	East

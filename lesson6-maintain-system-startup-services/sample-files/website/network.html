@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNS &amp; Networking — Linux Lab</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav>
+    <div class="nav-container">
+        <a href="index.html" class="logo">$ <span>linux-lab</span></a>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">How the Web Works</a></li>
+            <li><a href="network.html" class="active">DNS &amp; Networking</a></li>
+            <li><a href="services.html">systemd Services</a></li>
+            <li><a href="info.html">Server Info</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="hero">
+    <h1>DNS &amp; <span class="highlight">Networking</span></h1>
+    <p>How domain names become IP addresses — powered by BIND9 running on this server.</p>
+</div>
+
+<main>
+
+    <div class="content-section">
+        <h2>What is DNS?</h2>
+        <p>The <strong>Domain Name System (DNS)</strong> is the "phone book" of the internet. It translates human-readable domain names into machine-readable IP addresses.</p>
+
+        <table>
+            <tr><th>You Type</th><th>DNS Resolves To</th><th>Record Type</th></tr>
+            <tr><td><code>www.lab.local</code></td><td>192.168.1.100</td><td>A Record</td></tr>
+            <tr><td><code>ns1.lab.local</code></td><td>192.168.1.100</td><td>A Record</td></tr>
+            <tr><td><code>mail.lab.local</code></td><td>192.168.1.100</td><td>A Record</td></tr>
+            <tr><td><code>webserver.lab.local</code></td><td>→ www.lab.local</td><td>CNAME (alias)</td></tr>
+            <tr><td><code>lab.local</code> (mail)</td><td>→ mail.lab.local</td><td>MX Record</td></tr>
+            <tr><td><code>192.168.1.100</code></td><td>→ ns1.lab.local</td><td>PTR (reverse)</td></tr>
+        </table>
+
+        <div class="alert alert-info">
+            <strong>All these records</strong> are defined in <code>/etc/bind/zones/db.lab.local</code> on this server. You can edit that file, increment the serial number, and run <code>sudo rndc reload</code> to add new records.
+        </div>
+    </div>
+
+    <div class="content-section">
+        <h2>DNS Record Types Explained</h2>
+
+        <h3>A Record — Address</h3>
+        <p>Maps a hostname directly to an IPv4 address. This is the most common record type.</p>
+        <pre><code><span class="output">www     IN      A       192.168.1.100</span>
+<span class="comment">; "www.lab.local resolves to 192.168.1.100"</span></code></pre>
+
+        <h3>CNAME Record — Canonical Name (Alias)</h3>
+        <p>Creates an alias that points to another hostname. Useful for multiple names for the same server.</p>
+        <pre><code><span class="output">webserver   IN      CNAME   www.lab.local.</span>
+<span class="comment">; "webserver.lab.local is an alias for www.lab.local"</span></code></pre>
+
+        <h3>MX Record — Mail Exchange</h3>
+        <p>Specifies which server handles email for the domain. The number (10) is priority — lower = preferred.</p>
+        <pre><code><span class="output">@       IN      MX  10  mail.lab.local.</span>
+<span class="comment">; "Email for lab.local goes to mail.lab.local with priority 10"</span></code></pre>
+
+        <h3>NS Record — Name Server</h3>
+        <p>Declares which server is authoritative for this domain's DNS zone.</p>
+        <pre><code><span class="output">@       IN      NS      ns1.lab.local.</span>
+<span class="comment">; "ns1.lab.local is the name server for lab.local"</span></code></pre>
+
+        <h3>PTR Record — Pointer (Reverse DNS)</h3>
+        <p>The opposite of an A record — maps an IP address back to a hostname.</p>
+        <pre><code><span class="output">100     IN      PTR     www.lab.local.</span>
+<span class="comment">; "192.168.1.100 resolves back to www.lab.local"</span></code></pre>
+
+        <h3>SOA Record — Start of Authority</h3>
+        <p>Contains metadata about the zone: primary name server, admin email, serial number, and timing values.</p>
+        <pre><code><span class="output">@   IN  SOA  ns1.lab.local. admin.lab.local. (
+                2026030201  ; Serial — MUST increment on every change!
+                3600        ; Refresh — how often secondaries check for updates
+                1800        ; Retry — how long before retrying a failed refresh
+                604800      ; Expire — when secondaries stop answering
+                86400       ; Negative TTL — how long to cache "not found"
+         )</span></code></pre>
+    </div>
+
+    <div class="content-section">
+        <h2>Testing DNS — Commands to Try</h2>
+
+        <h3>dig (DNS Information Groper)</h3>
+        <pre><code><span class="comment"># Basic lookup</span>
+<span class="prompt">$</span> <span class="command">dig www.lab.local</span>
+
+<span class="comment"># Short answer only</span>
+<span class="prompt">$</span> <span class="command">dig www.lab.local +short</span>
+<span class="output">192.168.1.100</span>
+
+<span class="comment"># Query specific DNS server</span>
+<span class="prompt">$</span> <span class="command">dig @192.168.1.100 www.lab.local</span>
+
+<span class="comment"># Reverse lookup</span>
+<span class="prompt">$</span> <span class="command">dig -x 192.168.1.100 +short</span>
+<span class="output">ns1.lab.local.</span>
+
+<span class="comment"># Query MX records</span>
+<span class="prompt">$</span> <span class="command">dig lab.local MX</span>
+
+<span class="comment"># Query all record types</span>
+<span class="prompt">$</span> <span class="command">dig lab.local ANY</span></code></pre>
+
+        <h3>nslookup</h3>
+        <pre><code><span class="prompt">$</span> <span class="command">nslookup www.lab.local</span>
+<span class="prompt">$</span> <span class="command">nslookup www.lab.local 192.168.1.100</span></code></pre>
+
+        <h3>host</h3>
+        <pre><code><span class="prompt">$</span> <span class="command">host www.lab.local</span>
+<span class="output">www.lab.local has address 192.168.1.100</span></code></pre>
+    </div>
+
+    <div class="content-section">
+        <h2>How Your Machine Finds This DNS Server</h2>
+
+        <div class="diagram"><span class="label">Your Machine</span>
+    │
+    │  /etc/resolv.conf says:
+    │  nameserver 192.168.1.100
+    │  search lab.local
+    │
+    │  When you type "www.lab.local":
+    │
+    ▼
+<span class="label">BIND9 on 192.168.1.100:53</span>
+    │
+    │  Checks zone "lab.local"
+    │  File: /etc/bind/zones/db.lab.local
+    │  Found: www IN A 192.168.1.100
+    │
+    ▼
+<span class="label">Answer: 192.168.1.100</span>
+    │
+    │  If the query was for "google.com":
+    │  Not in our zone → Forward to 8.8.8.8
+    │
+    ▼
+<span class="label">Google DNS (8.8.8.8)</span> → Real answer</div>
+    </div>
+
+    <div class="content-section">
+        <h2>The Zone File — Where Records Live</h2>
+        <p>This is the actual zone file powering the DNS for <code>lab.local</code>:</p>
+        <pre><code><span class="comment">; /etc/bind/zones/db.lab.local</span>
+<span class="output">$TTL    604800
+@       IN      SOA     ns1.lab.local. admin.lab.local. (
+                        2026030201      ; Serial
+                        3600            ; Refresh
+                        1800            ; Retry
+                        604800          ; Expire
+                        86400 )         ; Negative Cache TTL
+
+@       IN      NS      ns1.lab.local.
+
+ns1     IN      A       192.168.1.100
+www     IN      A       192.168.1.100
+web     IN      A       192.168.1.100
+mail    IN      A       192.168.1.100
+ftp     IN      A       192.168.1.100
+db      IN      A       192.168.1.100
+app     IN      A       192.168.1.100
+
+webserver   IN  CNAME   www.lab.local.
+website     IN  CNAME   www.lab.local.
+dns         IN  CNAME   ns1.lab.local.
+
+@       IN      MX  10  mail.lab.local.
+@       IN      TXT     "v=spf1 mx -all"</span></code></pre>
+    </div>
+
+</main>
+
+<footer>
+    <p>FSCJ — Linux OS Fundamentals — Lesson 6.2.1</p>
+    <div class="footer-info">Served by Nginx on Debian | DNS by BIND9 | Managed by systemd</div>
+</footer>
+
+</body>
+</html>
