@@ -1,0 +1,21 @@
+StudentID,FirstName,LastName,Major,GPA,EnrollmentYear,Email
+S1001,Maria,Garcia,Computer Science,3.8,2024,mgarcia@college.edu
+S1002,James,Wilson,Cybersecurity,3.2,2023,jwilson@college.edu
+S1003,Sarah,Johnson,Network Admin,3.5,2024,sjohnson@college.edu
+S1004,Kevin,Brown,Computer Science,2.9,2025,kbrown@college.edu
+S1005,Lisa,Davis,Cybersecurity,3.7,2023,ldavis@college.edu
+S1006,Michael,Taylor,Network Admin,3.1,2024,mtaylor@college.edu
+S1007,Emily,Anderson,Computer Science,3.9,2023,eanderson@college.edu
+S1008,Daniel,Thomas,Cybersecurity,2.7,2025,dthomas@college.edu
+S1009,Ashley,Martinez,Network Admin,3.4,2024,amartinez@college.edu
+S1010,Ryan,Jackson,Computer Science,3.6,2023,rjackson@college.edu
+S1011,Jessica,White,Cybersecurity,3.3,2024,jwhite@college.edu
+S1012,Brandon,Harris,Network Admin,2.8,2025,bharris@college.edu
+S1013,Amanda,Clark,Computer Science,3.95,2023,aclark@college.edu
+S1014,Tyler,Lewis,Cybersecurity,3.0,2024,tlewis@college.edu
+S1015,Nicole,Robinson,Network Admin,3.6,2023,nrobinson@college.edu
+S1016,Justin,Walker,Computer Science,2.5,2025,jwalker@college.edu
+S1017,Rachel,Young,Cybersecurity,3.8,2024,ryoung@college.edu
+S1018,Andrew,Allen,Network Admin,3.2,2023,aallen@college.edu
+S1019,Megan,King,Computer Science,3.7,2024,mking@college.edu
+S1020,Chris,Wright,Cybersecurity,3.1,2025,cwright@college.edu

@@ -1,0 +1,37 @@
+Linux is an open-source operating system that was first released in 1991.
+It was created by Linus Torvalds as a free alternative to UNIX.
+Today, Linux powers everything from smartphones to supercomputers.
+
+The Linux kernel is the core of the operating system.
+It manages hardware resources and provides essential services.
+The kernel communicates between software and hardware.
+
+There are many Linux distributions available today.
+Ubuntu is one of the most popular distributions for beginners.
+Debian is known for its stability and is the base for Ubuntu.
+CentOS and Red Hat Enterprise Linux are popular in enterprise environments.
+Fedora is often used by developers who want the latest features.
+
+The command line interface is a powerful tool in Linux.
+Users can perform complex tasks by typing commands in the terminal.
+The shell interprets these commands and passes them to the kernel.
+Bash is the most common shell found on Linux systems.
+Zsh and Fish are alternative shells with additional features.
+
+File permissions in Linux control who can read, write, and execute files.
+Every file has an owner, a group, and permissions for others.
+The chmod command changes file permissions.
+The chown command changes file ownership.
+Understanding file permissions is essential for system security.
+
+Processes in Linux are instances of running programs.
+Every process has a unique process ID called a PID.
+The ps command shows running processes.
+The top command provides a real-time view of system processes.
+The kill command sends signals to processes to stop them.
+
+Package managers make it easy to install software on Linux.
+APT is the package manager used by Debian and Ubuntu.
+YUM and DNF are used by Red Hat, CentOS, and Fedora.
+Package managers handle dependencies automatically.
+Keeping packages updated is important for security.
